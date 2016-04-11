@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Sketchy: Sketcher</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<style>
+		body {
+			background-color: grey;
+			padding: 0;
+			margin: 0;
+			height: 100vh;
+			width: 100%;
+			overflow: hidden;
+			touch-action: none;
+		}
+		
+		div {
+			padding: 0;
+			margin: 0;
+		}
+		
+		#rotate_screen {
+			display: none;
+			position: fixed;
+			height: 100vh;
+			width: 100%;
+			z-index: 20;
+			background-color: red;
+		}
+		
+		#small_screen {
+			display: none;
+			position: fixed;
+			height: 100vh;
+			width: 100%;
+			z-index: 20;
+			background-color: darkred;
+		}
+		
+		#sidebar_container {
+			display: inline-block;
+			width: 20mm;
+			height: 100vh;
+			float: left;
+			background-color: green;
+		}
+		
+		.sidebar {
+			position: absolute;
+			height: 100%;
+			width: 20mm;
+		}
+		
+		.btn_container {
+			position: absolute;
+			height: 40mm;
+			width: 20mm;
+			top: calc((100vh - 40mm) / 2);
+			line-height: 2mm;
+			text-align: center;
+		}
+		
+		.btn{
+			display: inline-block;
+			height: 10mm;
+			width: calc((100% / 2) - 0.1mm);
+			background-color: orange;
+			text-align: center;
+		}
+				
+		#sidebar_draw {
+			background-color: green;
+		}
+		
+		#draw_btn_container{
+			background-color: red;
+		}
+		
+		#sidebar_view {
+			z-index: 5;
+			background-color: darkgreen;
+			top: calc(4mm - 100%);
+		}
+		
+		#view_btn_container {
+			background-color: darkred;
+		}
+		
+		#view_drag {
+			position: absolute;
+			bottom: -3mm;			
+			margin-left: 5mm;
+			margin-right: 5mm;
+		}
+		
+		#sidebar_options {
+			z-index: 5;
+			background-color: olive;
+			top: calc(100% - 4mm);
+		}
+		
+		#options_btn_container {
+			background-color: darkred;
+		}
+		
+		#options_drag {
+			position: absolute;
+			top: -3mm;			
+			margin-left: 5mm;
+			margin-right: 5mm;
+		}
+		
+		#canvas_container {
+			display: inline-block;
+			width: calc(100% - 20mm);
+			height: 100vh;
+			float: right;
+			background-color: grey;
+		}
+		
+		#canvas {
+			display: inline-block;
+			height: calc((100vw - 20mm) / 4 * 3);
+			max-height: 100%;
+			width: calc(400vh / 3);
+			max-width: 100%;
+			vertical-align: middle;
+			background-color: white;
+		}
+		
+		@media only screen and (max-height: 54mm) {
+			#small_screen {	display: block; }
+			#sidebar_container { display: none;	}
+			#canvas_container {	display: none; }
+		}
+
+		@media only screen and (orientation: portrait) {
+			#rotate_screen { display: block; }
+			#canvas_container {	display: none; }
+			#small_screen {	display: none; }
+		}
+		
+		</style>
+	</head>
+	<body>
+		<div id="rotate_screen">Rotate screen!</div>
+		<div id="small_screen">Screen too small!</div>
+		<div id='sidebar_container'>
+			<div id='sidebar_view' class=sidebar>
+				<div id='view_btn_container' class=btn_container>
+					<div id='vbtn1' class=btn><br><br>b1
+					</div><div id='vbtn2' class=btn><br><br>b2
+					</div><br><div id='vbtn3' class=btn><br><br>b3
+					</div><br><div id='vbtn4' class=btn><br><br>b4</div>
+				</div>
+				<div id='view_drag' class=btn></div>
+			</div>
+			<div id='sidebar_draw' class=sidebar>
+				<div id='draw_btn_container' class=btn_container>
+					<div id='dbtn1' class=btn><br><br>b1
+					</div><br><div id='dbtn2' class=btn><br><br>b2
+					</div><br><div id='dbtn3' class=btn><br><br>b3
+					</div><div id='dbtn4' class=btn><br><br>b4
+					</div><div id='dbtn5' class=btn><br><br>b5
+					</div><div id='dbtn6' class=btn><br><br>b6</div>
+				</div>
+			</div>
+			<div id='sidebar_options' class=sidebar>
+				<div id='options_drag' class=btn></div>
+				<div id='options_btn_container' class=btn_container>
+					<div id='obtn1' class=btn><br><br>b1
+					</div><div id='obtn2' class=btn><br><br>b2
+					</div><br><div id='obtn3' class=btn><br><br>b3
+					</div><div id='obtn3' class=btn><br><br>b4
+					</div><br><div id='obtn4' class=btn><br><br>b5</div>
+				</div>
+			</div>
+		</div>
+		<div id="canvas_container">
+			<div id="canvas"></div>
+		</div>
+	</body>
+</html>
+
+<script type="text/javascript">
+
+window.addEventListener('load', function(){
+	
+	var vDrag = $('#view_drag');
+	var oDrag = $('#options_drag');
+	var vBar = $('#sidebar_view');
+	var oBar = $('#sidebar_options');
+	var canvas = $('#canvas');
+	
+	var vybar_start, oybar_start, vytouchstart, oytouchstart;
+	
+	canvas.html('vBar offset: ' + parseInt(vBar.css('top')) + '<br>'
+				+ 'oBar offset: ' + parseInt(oBar.css('top')));
+	
+	var vDragElement = document.getElementById('view_drag');
+	var oDragElement = document.getElementById('options_drag');
+	var vDragGrabbed = false;
+	var oDragGrabbed = false;
+	
+/**************************
+ * 'touch' event handling *
+ **************************/
+	
+	vDragElement.addEventListener('touchstart', function(e){
+		vBarGrab(parseInt(e.changedTouches[0].clientY));
+		e.preventDefault();
+	}, false)
+
+	vDragElement.addEventListener('touchmove', function(e){
+		vBarMove(parseInt(e.changedTouches[0].clientY));
+		e.preventDefault();
+	}, false)
+	
+	vDragElement.addEventListener('touchend', function(e){
+		vBarRelease();
+		e.preventDefault();
+	}, false)
+	
+	oDragElement.addEventListener('touchstart', function(e){
+		oBarGrab(parseInt(e.changedTouches[0].clientY));
+		e.preventDefault();
+	}, false)
+	
+	oDragElement.addEventListener('touchmove', function(e){
+		oBarMove(parseInt(e.changedTouches[0].clientY));
+		e.preventDefault();
+	}, false)
+	
+	oDragElement.addEventListener('touchend', function(e){
+		oBarRelease();
+		e.preventDefault();
+	}, false)
+
+/**************************
+ * 'mouse' event handling *
+ **************************/
+
+	vDragElement.addEventListener('mousedown', function(e){
+		vBarGrab(parseInt(e.clientY));
+		vDragGrabbed = true;
+		e.preventDefault();
+	}, false)
+	
+	oDragElement.addEventListener('mousedown', function(e){
+		oBarGrab(parseInt(e.clientY));
+		oDragGrabbed = true;
+		e.preventDefault();
+	}, false)
+	
+	document.addEventListener('mousemove', function(e){
+		if (vDragGrabbed) vBarMove(parseInt(e.clientY));
+		if (oDragGrabbed) oBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}, false)
+	
+	document.addEventListener('mouseup', function(e){
+		if (vDragGrabbed == true) {
+			vDragGrabbed = false;
+			vBarRelease();
+		}
+		if (oDragGrabbed == true) {
+			oDragGrabbed = false;
+			oBarRelease();
+		}
+		e.preventDefault();
+	}, false)
+	
+/*********************************
+ * 'pointer' event handling (IE) *
+ *********************************/
+
+	vDragElement.addEventListener('pointerdown', function(e){
+		vBarGrab(parseInt(e.clientY));
+		vDragGrabbed = true;
+		e.preventDefault();
+	}, false)
+	
+	oDragElement.addEventListener('pointerdown', function(e){
+		oBarGrab(parseInt(e.clientY));
+		oDragGrabbed = true;
+		e.preventDefault();
+	}, false)
+	
+	document.addEventListener('pointermove', function(e){
+		if (vDragGrabbed) vBarMove(parseInt(e.clientY));
+		if (oDragGrabbed) oBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}, false)
+	
+	document.addEventListener('pointerup', function(e){
+		if (vDragGrabbed == true) {
+			vDragGrabbed = false;
+			vBarRelease();
+		}
+		if (oDragGrabbed == true) {
+			oDragGrabbed = false;
+			oBarRelease();
+		}
+		e.preventDefault();
+	}, false)
+
+/*****************************************************
+ * browser independent sidebar pull up/down handlers *
+ *****************************************************/
+	
+	function vBarGrab(y) {
+		sidebarGrabbed();
+		vybar_start = parseInt(vBar.css('top'));
+		vytouchstart = y;
+		canvas.html('touched at: ' + y + '<br>'
+					+ 'view bar at: ' + vybar_start);
+	}
+	
+	function vBarMove(y) {
+		var dist = y - vytouchstart;
+		var floor = -1 * $('#sidebar_container').height();
+		var vy_new = Math.min(0, Math.max(floor, vybar_start + dist));
+		vBar.css('top', vy_new + 'px');
+		canvas.html('initially touched at: ' + vytouchstart + '<br>'
+					+ 'currently touching at: ' + y + '<br>'
+					+ 'moved vertically by: ' + dist + '<br>'
+					+ 'view bar was at: ' + vybar_start + '<br>'
+					+ 'new bar position: ' + vy_new + 'px');
+	}
+	
+	function vBarRelease() {
+		sidebarReleased();
+		var y_current = parseInt(vBar.css('top'));
+		var threshold = (-1 * $('#sidebar_container').height()) / 2;
+		if (y_current < threshold) //retract sidebar
+			vBar.css('top', 'calc(4mm - 100%)');
+		else { //sidebar pulled down
+			vBar.css('top', '0px');
+			vBar.css('z-index', '5');
+			oBar.css('z-index', '4');
+		}
+		canvas.html('view bar release point: ' + y_current + '<br>'
+					+ 'action: ' + ((threshold > y_current) ? 'retract' : 'pull down'));
+	}
+	
+	function oBarGrab(y) {
+		sidebarGrabbed();
+		oybar_start = parseInt(oBar.css('top'));
+		oytouchstart = y;
+		canvas.html('touched at: ' + oytouchstart + '<br>'
+					+ 'options bar at: ' + oybar_start);
+	}
+	
+	function oBarMove(y) {
+		var dist = y - oytouchstart;
+		var ceiling = $('#sidebar_container').height();
+		var oy_new = Math.max(0, Math.min(ceiling, oybar_start + dist));
+		oBar.css('top', oy_new + 'px');
+		canvas.html('initially touched at: ' + oytouchstart + '<br>'
+					+ 'currently touching at: ' + y + '<br>'
+					+ 'moved vertically by: ' + dist + '<br>'
+					+ 'options bar was at: ' + oybar_start + '<br>'
+					+ 'new bar position: ' + oy_new + 'px');
+	}
+	
+	function oBarRelease() {
+		sidebarReleased();
+		var y_current = parseInt(oBar.css('top'));
+		var threshold = $('#sidebar_container').height() / 2;
+		if (y_current > threshold) //retract sidebar
+			oBar.css('top', 'calc(100% - 4mm)');
+		else { //sidebar pulled up
+			oBar.css('top', '0px');
+			oBar.css('z-index', '5');
+			vBar.css('z-index', '4');
+		}
+		canvas.html('options bar release point: ' + y_current + '<br>'
+					+ 'action: ' + ((y_current > threshold) ? 'retract' : 'pull up'));
+	}
+	
+	//fade out canvas area and show button names
+	function sidebarGrabbed() {
+		canvas.fadeOut(300);
+		$('.btn').css('background-color', 'white');
+	}
+
+	//fade in canvas area and show button icons
+	function sidebarReleased() {
+		canvas.fadeIn(300);
+		$('.btn').css('background-color', 'orange');	
+	}
+	
+}, false)
+
+</script>
