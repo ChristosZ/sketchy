@@ -14,173 +14,48 @@
 			<div id='sidebar_view' class=sidebar>
 				<div id='view_btn_container' class=btn_container>
 					<div id='slider_scroll' class=btn><br><br>sc
-					</div><div id='btn_active' class='btn help'><br><br>
-					</div><br><div id='btn_posted' class='btn help'><br><br>
+					</div><div id='btn_active' class='btn help hover'><br><br>
+					</div><br><div id='btn_posted' class='btn help hover'><br><br>
 					</div><br><div id='btn_tribe' class='btn help'><br><br></div>
 				</div>
-				<div id='view_drag' class='btn help'></div>
+				<div id='view_drag' class='btn help hover'></div>
 			</div>
 			<div id='sidebar_draw' class=sidebar>
 				<div id='draw_btn_container' class=btn_container>
-				
-					<div style="position:absolute;top:0;left:1mm;width:6mm;height:6mm;background:green;" id="green" onclick="color(this)"></div>
-					<div style="position:absolute;top:0;left:7mm;width:6mm;height:6mm;background:blue;" id="blue" onclick="color(this)"></div>
-					<div style="position:absolute;top:0;left:13mm;width:6mm;height:6mm;background:red;" id="red" onclick="color(this)"></div>
-					<div style="position:absolute;top:6mm;left:1mm;width:6mm;height:6mm;background:yellow;" id="yellow" onclick="color(this)"></div>
-					<div style="position:absolute;top:6mm;left:7mm;width:6mm;height:6mm;background:orange;" id="orange" onclick="color(this)"></div>
-					<div style="position:absolute;top:6mm;left:13mm;width:6mm;height:6mm;background:black;" id="black" onclick="color(this)"></div>
-					<div style="position:absolute;top:12mm;left:7mm;width:6mm;height:6mm;background:white;" id="white" onclick="color(this)"></div>
-
-					<img id="canvasimg" style="position:absolute;top:50%;left:200%;" style="display:none;">
-					<input type="button" value="save" id="btn" size="20" onclick="save()" style="position:absolute;top:80%;left:300%;">
-					<input type="button" value="clear" id="clr" size="20" onclick="erase()" style="position:absolute;top:100%;left:300%;">
-					<input type="range" id="setwidth" value="50" style = "position:absolute;top:60%;left:250%">
-
+					<div style="top:0;left:1mm;background:green;" id="green" class=colorbtn></div>
+					<div style="top:0;left:7mm;background:blue;" id="blue" class=colorbtn></div>
+					<div style="top:0;left:13mm;background:red;" id="red" class=colorbtn></div>
+					<div style="top:6mm;left:1mm;background:yellow;" id="yellow" class=colorbtn></div>
+					<div style="top:6mm;left:7mm;background:orange;" id="orange" class=colorbtn></div>
+					<div style="top:6mm;left:13mm;background:black;" id="black" class=colorbtn></div>
 					
-					<div id='btn_colorwheel' class='btn help'><br><br>
-					</div><br><div id='slider_width' class=btn><br><br>w
-					</div><br><div id='btn_draw' class='btn help'><br><br>
-					</div><div id='btn_erase' class='btn help'><br><br>
-					</div><div id='btn_undo' class='btn help'><br><br>
-					</div><div id='btn_redo' class='btn help'><br><br></div>
+					<div id='btn_colorwheel' class='btn help' style='height:10mm;'>
+					</div><input type='range' id='size_slider'>
+					</input><div id='btn_draw' class='btn help hover'>
+					</div><div id='btn_erase' class='btn help hover'>
+					</div><div id='btn_undo' class='btn help hover'>
+					</div><div id='btn_redo' class='btn help hover'></div>
 				</div>
 			</div>
 			<div id='sidebar_options' class=sidebar>
-				<div id='options_drag' class='btn help'></div>
+				<div id='options_drag' class='btn help hover'></div>
 				<div id='options_btn_container' class=btn_container>
-					<div id='btn_save' class='btn help'><br><br>
-					</div><div id='btn_post' class='btn help'><br><br>
-					</div><br><div id='btn_mirror' class='btn help'><br><br>
-					</div><div id='btn_close' class='btn help'><br><br>
+					<div id='btn_save' class='btn help hover'><br><br>
+					</div><div id='btn_post' class='btn help hover'><br><br>
+					</div><br><div id='btn_mirror' class='btn help hover'><br><br>
+					</div><div id='btn_clear' class='btn help hover'><br><br>
 					</div><br><div id='btn_tribes' class='btn help'><br><br></div>
 				</div>
 			</div>
 		</div>
 		<div id='canvas_container'>
-			<div id='canvas'></div>
-			<canvas id='can' width='80' height='80' style='display:inline-block; position:absolute;top:20%;left:20%;border:2px solid;'></canvas>
+			<div id='canvas'>
+				<canvas id='canvas_layer0' width=100% height=100%></canvas>
+<!--Undo layers:<canvas id='canvas_layer1'></canvas>
+				<canvas id='canvas_layer2'></canvas>
+				<canvas id='canvas_layer3'></canvas> -->
+			</div>	
+			<img id="canvas_img"></img>
 		</div>
 	</body>
 </html>
-
-<script>
-var canvas2, ctx, flag = false,
-	prevX = 0,
-	currX = 0,
-	prevY = 0,
-	currY = 0,
-	dot_flag = false;
-
-	var x = "black",
-		y = (parseInt(document.getElementById('setwidth').value)+1)/10;
-
-	init();
-		
-function init() {
-	canvas2 = document.getElementById('can');
-	ctx = canvas2.getContext("2d");
-	w = canvas2.width;
-	h = canvas2.height;
-
-	canvas2.addEventListener("mousemove", function (e) {
-		findxy('move', e)
-	}, false);
-	canvas2.addEventListener("mousedown", function (e) {
-		findxy('down', e)
-	}, false);
-	canvas2.addEventListener("mouseup", function (e) {
-		findxy('up', e)
-	}, false);
-	canvas2.addEventListener("mouseout", function (e) {
-		findxy('out', e)
-	}, false);
-}
-
-function color(obj) {
-	switch (obj.id) {
-		case "green":
-			x = "green";
-			break;
-		case "blue":
-			x = "blue";
-			break;
-		case "red":
-			x = "red";
-			break;
-		case "yellow":
-			x = "yellow";
-			break;
-		case "orange":
-			x = "orange";
-			break;
-		case "black":
-			x = "black";
-			break;
-		case "white":
-			x = "white";
-			break;
-	}
-	if (x == "white") y = 14;
-	else y = (parseInt(document.getElementById('setwidth').value)+1)/10;
-
-}
-
-function draw() {
-	ctx.beginPath();
-	ctx.strokeStyle = x;
-	ctx.lineWidth = (parseInt(document.getElementById('setwidth').value)+1)/10;
-	ctx.lineJoin = "round";
-	ctx.moveTo(prevX, prevY);
-	ctx.lineTo(currX, currY);
-	ctx.closePath();
-	ctx.stroke();
-}
-
-function erase() {
-	var m = confirm("Want to clear");
-	if (m) {
-		ctx.clearRect(0, 0, w, h);
-		document.getElementById("canvasimg").style.display = "none";
-	}
-}
-
-function save() {
-	document.getElementById("canvasimg").style.border = "2px solid";
-	var dataURL = canvas2.toDataURL();
-	document.getElementById("canvasimg").src = dataURL;
-	document.getElementById("canvasimg").style.display = "inline";
-}
-
-function findxy(res, e) {
-	if (res == 'down') {
-		prevX = currX;
-		prevY = currY;
-		currX = e.clientX - canvas2.offsetLeft;
-		currY = e.clientY - canvas2.offsetTop;
-
-		flag = true;
-		dot_flag = true;
-		if (dot_flag) {
-			ctx.beginPath();
-			ctx.fillStyle = x;
-			ctx.fillRect(currX, currY, 2, 2);
-			ctx.closePath();
-			dot_flag = false;
-		}
-	}
-	if (res == 'up' || res == "out") {
-		flag = false;
-	}
-	if (res == 'move') {
-		if (flag) {
-			prevX = currX;
-			prevY = currY;
-			currX = e.clientX - canvas2.offsetLeft;
-			currY = e.clientY - canvas2.offsetTop;
-			draw();
-		}
-	}
-}
-
-
-</script>
