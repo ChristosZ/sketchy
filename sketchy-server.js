@@ -11,8 +11,14 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
 app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
+<<<<<<< HEAD
 app.set('views', __dirname);
 app.use(express.static(__dirname));
+=======
+app.set('views', __dirname + '/html');
+
+app.use(express.static(__dirname + '/html'));
+>>>>>>> master
 
 
 //global arrays? should be using a database for this...
@@ -25,7 +31,11 @@ app.get('/', function(req, res){
 	console.log('- Request received:', req.method.cyan, req.url.underline);
 	
 	//render index.html
+<<<<<<< HEAD
 	res.render("sketcher.html");
+=======
+	res.render("sketchy_sketcher.html");
+>>>>>>> master
 
 	//join, redirects to /newuser
 
@@ -68,8 +78,12 @@ app.get('/:roomName/:user', function(req, res) {
 	var user = req.params.user;
 
 	console.log('- Request received:', req.method.cyan, req.url.underline);
+<<<<<<< HEAD
 	res.render("sketcher.html");
 
+=======
+	res.render("sketchy_sketcher.html");
+>>>>>>> master
 
 });
 
@@ -82,9 +96,13 @@ app.post('/:roomName/images', function(req, res) {
 //catch all, unnecessary
 app.get('*', function(req, res){
 	console.log('- Request received:', req.method.cyan, req.url.underline);
+<<<<<<< HEAD
 
 	res.render("sketcher.html");
 
+=======
+	res.render("sketchy_sketcher.html");
+>>>>>>> master
 });
 
 
@@ -92,11 +110,14 @@ server.listen(8080, function(){
     console.log('- Server listening on port 8080'.grey);
 });
 
+<<<<<<< HEAD
 
 
 //SOCKETS
 
 
+=======
+>>>>>>> master
 io.sockets.on('connection', function(socket) {
 
 	socket.on('join', function(room, user, tribe) {
@@ -111,8 +132,12 @@ io.sockets.on('connection', function(socket) {
 		//emit the changes to the client (:/roomName/images)
 	});
 
+<<<<<<< HEAD
 
 	socket.on('submit', function(room, user) {
+=======
+	socket.on('submitted', function(room, user) {
+>>>>>>> master
 
 		//push the final image to the room's submitted array
 
