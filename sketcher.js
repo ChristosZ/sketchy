@@ -391,15 +391,8 @@ $('#btn_clear').click(function(e){
 
 $('#btn_mirror').click(function(e){
 	var bar = $('#sidebar_container');
-	var addr = bar.css('background-image');
-	if (bar.css('float') == 'left') {
-		bar.css('float', 'right');
-		bar.css('background-image', addr.replace('_left.png','_right.png'));
-	}
-	else {
-		bar.css('float', 'left');
-		bar.css('background-image', addr.replace('_right.png','_left.png'));		
-	}
+	if (bar.css('float') == 'left') bar.css('float', 'right');
+	else bar.css('float', 'left');
 });
 
 $('#btn_post').click(function(e){
