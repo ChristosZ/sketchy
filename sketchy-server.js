@@ -11,9 +11,9 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
 app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
-app.set('views', __dirname + '/html');
+app.set('views', __dirname);
 
-app.use(express.static(__dirname + '/html'));
+app.use(express.static(__dirname));
 
 
 //global arrays? should be using a database for this...
@@ -90,6 +90,8 @@ server.listen(8080, function(){
     console.log('- Server listening on port 8080'.grey);
 });
 
+
+//SOCKETS
 io.sockets.on('connection', function(socket) {
 
 	socket.on('join', function(room, user, tribe) {
@@ -104,7 +106,7 @@ io.sockets.on('connection', function(socket) {
 		//emit the changes to the client (:/roomName/images)
 	});
 
-	socket.on('submitted', function(room, user) {
+	socket.on('submit', function(room, user) {
 
 		//push the final image to the room's submitted array
 
