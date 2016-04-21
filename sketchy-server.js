@@ -12,7 +12,6 @@ var io = require('socket.io').listen(server);
 
 app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
 app.set('views', __dirname);
-
 app.use(express.static(__dirname));
 
 
@@ -71,6 +70,7 @@ app.get('/:roomName/:user', function(req, res) {
 	console.log('- Request received:', req.method.cyan, req.url.underline);
 	res.render("sketcher.html");
 
+
 });
 
 
@@ -82,7 +82,9 @@ app.post('/:roomName/images', function(req, res) {
 //catch all, unnecessary
 app.get('*', function(req, res){
 	console.log('- Request received:', req.method.cyan, req.url.underline);
+
 	res.render("sketcher.html");
+
 });
 
 
@@ -91,7 +93,10 @@ server.listen(8080, function(){
 });
 
 
+
 //SOCKETS
+
+
 io.sockets.on('connection', function(socket) {
 
 	socket.on('join', function(room, user, tribe) {
@@ -105,6 +110,7 @@ io.sockets.on('connection', function(socket) {
 		//take the users sketch and add the updates to the global array
 		//emit the changes to the client (:/roomName/images)
 	});
+
 
 	socket.on('submit', function(room, user) {
 
