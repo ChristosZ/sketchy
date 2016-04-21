@@ -31,25 +31,25 @@ div {
 	background-color: darkred;
 }
 	
-#sidebar_container {
+#left_sidebar_container {
 	display: inline-block;
 	width: 20mm;
 	height: 100vh;
 	float: left;
-	background-color: green;
 }
 
-.sidebar {
-	position: absolute;
-	height: 100%;
+#right_sidebar_container {
+	display: inline-block;
 	width: 20mm;
+	height: 100vh;
+	float: right;
 }
 
 .btn_container {
 	position: absolute;
-	height: 40mm;
+	height: 60mm;
 	width: 20mm;
-	top: calc((100vh - 40mm) / 2);
+	top: calc((100vh - 60mm) / 2);
 	line-height: 2mm;
 	text-align: center;
 }
@@ -68,36 +68,6 @@ div {
 	height:6mm;
 }
 
-#sidebar_draw {
-	background-color: green;
-}
-
-#sidebar_view {
-	z-index: 5;
-	background-color: darkgreen;
-	top: calc(4mm - 100%);
-}
-
-#view_drag {
-	position: absolute;
-	bottom: -3mm;	
-	margin-left: 5mm;
-	margin-right: 5mm;
-}
-
-#sidebar_options {
-	z-index: 5;
-	background-color: olive;
-	top: calc(100% - 4mm);
-}
-
-#options_drag {
-	position: absolute;
-	top: -3mm;	
-	margin-left: 5mm;
-	margin-right: 5mm;
-}
-
 #size_slider {
 	height: 10mm;
 	width: calc(100% - 2mm);
@@ -107,15 +77,15 @@ div {
 
 #canvas_container {
 	display: inline-block;
-	width: calc(100% - 20mm);
-	height: 100vh;
-	float: right;
+	width: calc((100% - 40mm) / 2);
+	height: 50vh;
+	float: left;
 	background-color: grey;
 }
 
 #canvas {
 	display: inline-block;
-	height: calc((100vw - 20mm) / 4 * 3);
+	height: calc((100vw - 40mm) / 4 * 3);
 	max-height: 100%;
 	width: calc(400vh / 3);
 	max-width: 100%;
@@ -168,4 +138,5 @@ div {
 #btn_mirror { background-image: url('img/blue/mirror.png'); }
 #btn_clear { background-image: url('img/blue/clear.png'); }
 #btn_tribes { background-image: url('img/blue/tribe.png'); }
-.sidebar { background-image: url('img/blue/bar_left.png'); }
+#left_sidebar_container { background-image: url('img/blue/bar_left.png'); }
+#right_sidebar_container { background-image: url('img/blue/bar_left.png'); }
