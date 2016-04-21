@@ -26,7 +26,7 @@ app.get('/', function(req, res){
 	console.log('- Request received:', req.method.cyan, req.url.underline);
 	
 	//render index.html
-	res.render("sketchy_sketcher.html");
+	res.render("sketcher.html");
 
 	//join, redirects to /newuser
 
@@ -69,7 +69,7 @@ app.get('/:roomName/:user', function(req, res) {
 	var user = req.params.user;
 
 	console.log('- Request received:', req.method.cyan, req.url.underline);
-	res.render("sketchy_sketcher.html");
+	res.render("sketcher.html");
 
 });
 
@@ -82,7 +82,7 @@ app.post('/:roomName/images', function(req, res) {
 //catch all, unnecessary
 app.get('*', function(req, res){
 	console.log('- Request received:', req.method.cyan, req.url.underline);
-	res.render("sketchy_sketcher.html");
+	res.render("sketcher.html");
 });
 
 
