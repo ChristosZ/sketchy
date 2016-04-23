@@ -36,7 +36,6 @@ div {
 	width: 20mm;
 	height: 100vh;
 	float: left;
-	background-color: green;
 }
 
 .sidebar {
@@ -68,13 +67,10 @@ div {
 	height:6mm;
 }
 
-#sidebar_draw {
-	background-color: green;
-}
+#sidebar_draw {}
 
 #sidebar_view {
 	z-index: 5;
-	background-color: darkgreen;
 	top: calc(4mm - 100%);
 }
 
@@ -87,7 +83,6 @@ div {
 
 #sidebar_options {
 	z-index: 5;
-	background-color: olive;
 	top: calc(100% - 4mm);
 }
 
