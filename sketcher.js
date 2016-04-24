@@ -35,14 +35,18 @@ ctx.fill();
 
 
 $(window).resize(function() {
-	if (step != 0) {
-		//var newtrack = new Image();
-		//newtrack.src = trackimage[step];
-		//canvas0[0].width = canvas0[0].offsetWidth;
-		//canvas0[0].height = canvas0[0].offsetHeight;
-		//ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
-		//newtrack.onload = function() {ctx.drawImage(newtrack,0,0);}
+	clearTimeout(window.resizedFinished);
+	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
+		trackimage.push(canvas0[0].toDataURL());
 	}
+    window.resizedFinished = setTimeout(function(){
+    	canvas0[0].width = canvas0[0].offsetWidth;
+	    canvas0[0].height = canvas0[0].offsetHeight;
+        var newtrack = new Image();
+		newtrack.src = trackimage[trackimage.length-1];
+		ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
+		newtrack.onload = function() {ctx.drawImage(newtrack,0,0,canvas0[0].width,canvas0[0].height);}
+    }, 250);
 });
 
 /***********************************************
@@ -306,6 +310,8 @@ var flag = false,
 	dot_flag = false;
 var trackimage = new Array();
 var step = 0;
+$('#btn_undo').css("pointer-events", "none");
+$('#btn_redo').css("pointer-events", "none");
 
 canvas0.on('mousedown pointerdown', function (e) {findxy('down', e.originalEvent)});
 canvas0.on('mousemove pointermove', function (e) {findxy('move', e.originalEvent)});
@@ -332,10 +338,9 @@ function findxy(res, e) {
 	if (res == 'down') {
 		currX = e.clientX - canvas0[0].offsetLeft;
 		currY = e.clientY - canvas0[0].offsetTop;
-
+		push();
 		flag = true;
 		dot_flag = true;
-		push();
 		if (dot_flag) {
 			ctx.beginPath();
 			ctx.fillStyle = (mode == 'erase') ? 'white' : color;
@@ -367,14 +372,12 @@ function findxy(res, e) {
 function push(){
 	step++;
 	$('#btn_undo').css("pointer-events", "auto");
-	console.log(step);
 	if (step < trackimage.length){
 		trackimage = trackimage.slice(0, step);
 	}
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
 		trackimage.push(canvas0[0].toDataURL());
 	}
-	//console.log(trackimage);
 }
 
 /******************************
@@ -387,7 +390,6 @@ $('.colorbtn').click(function(e){
 });
 
 $('#btn_undo').click(function(e){
-	console.log('undo');
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
 		trackimage.push(canvas0[0].toDataURL());
 	}
@@ -395,17 +397,11 @@ $('#btn_undo').click(function(e){
 	if (step > 0){
 		step --;
 		var oldtrack = new Image();
-		//console.log(trackimage[step])
 		oldtrack.src = trackimage[step];
-		//console.log(trackimage[step])
-		//console.log(ctx);
-		//console.log('heres');
 		ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
 		oldtrack.onload = function (){ctx.drawImage(oldtrack,0,0);}
-		//newimage.onload = function() {ctx.drawImage(newimage,2,2);}
 	}
 	if (step == 0){
-		console.log('step = 0');
 		$('#btn_undo').css("pointer-events", "none");
 	}
 	
@@ -414,20 +410,16 @@ $('#btn_undo').click(function(e){
 });
 
 $('#btn_redo').click(function(e){
-	console.log('redo');
 	if (step < trackimage.length-1){
 			step++;
-			//console.log(step);
 			var newtrack = new Image();
 			newtrack.src = trackimage[step];
-			//console.log(trackimage[step]);
 			ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
 			newtrack.onload = function() {ctx.drawImage(newtrack,0,0);}
 	}
 	if (step == trackimage.length-1){
 		$('#btn_redo').css("pointer-events", "none");
 		$('#btn_undo').css("pointer-events", "auto");
-		console.log('here');
 	}
 	
 	//TODO: adjust canvas layer visibility, notify server

@@ -157,10 +157,10 @@ div {
 #options_drag { background-image: url('img/blue/options.png'); }
 #btn_active { background-image: url('img/blue/draw.png'); }
 #btn_posted { background-image: url('img/blue/post.png'); }
-#btn_tribe { background-image: url('img/blue/tribe.png'); }
+#btn_tribe { background-image: url('img/common/tribe.png'); }
 #btn_save { background-image: url('img/blue/save.png'); }
 #btn_post { background-image: url('img/blue/post.png'); }
 #btn_mirror { background-image: url('img/blue/mirror.png'); }
 #btn_clear { background-image: url('img/blue/clear.png'); }
-#btn_tribes { background-image: url('img/blue/tribe.png'); }
+#btn_tribes { background-image: url('img/common/tribe.png'); }
 .sidebar { background-image: url('img/blue/bar_left.png'); }
