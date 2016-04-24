@@ -16,6 +16,8 @@ var vybar_start, oybar_start, vytouchstart, oytouchstart;
 var vDragGrabbed = false;
 var oDragGrabbed = false;
 
+var tribes = ['blue', 'green', 'orange']
+var tribe = 'blue';
 var mode = 'draw';
 var color = 'black';
 var brushSize = 6;
@@ -23,22 +25,34 @@ var eraserSize = 7;
 
 hover(drawBtn);
 $('#size_slider').val((brushSize*10)-1);
-
 canvas0[0].width = canvas0[0].offsetWidth;
 canvas0[0].height = canvas0[0].offsetHeight;
 ctx.fillStyle = 'white'; //canvas is transparent by default
 ctx.fillRect(0, 0, canvas0.width(), canvas0.height());
 ctx.fill();
 
-//canvas offset when window is resized
-//undo/redo initial one step
+//First line takes a while to register?
+//draw off page quickly breaks the line
+//click and drag off bottom in IE scrolls a bit
 
+/****************************
+ * General display behavior *
+ ****************************/
+
+var cCont = $('#canvas_container');
+var rotateMsg = $('#rotate_screen_msg');
+
+canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
+rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
 
 $(window).resize(function() {
+	canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
+	rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
+
 	clearTimeout(window.resizedFinished);
-	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
+	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1)
 		trackimage.push(canvas0[0].toDataURL());
-	}
+	
     window.resizedFinished = setTimeout(function(){
     	canvas0[0].width = canvas0[0].offsetWidth;
 	    canvas0[0].height = canvas0[0].offsetHeight;
@@ -48,10 +62,6 @@ $(window).resize(function() {
 		newtrack.onload = function() {ctx.drawImage(newtrack,0,0,canvas0[0].width,canvas0[0].height);}
     }, 250);
 });
-
-/***********************************************
- * General button hover/press display behavior *
- ***********************************************/
 
 $('.hover').mouseenter(function(e){
 	hover($(this));
@@ -191,18 +201,26 @@ oDrag.on('mousedown pointerdown', function(e){
 })
 
 $(document).on('mousemove pointermove', function(e){
-	if (vDragGrabbed) vBarMove(parseInt(e.clientY));
-	if (oDragGrabbed) oBarMove(parseInt(e.clientY));
+	if (vDragGrabbed) {
+		vBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}
+	if (oDragGrabbed) {
+		oBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}
 })
 
 $(document).on('mouseup pointerup', function(e){
 	if (vDragGrabbed == true) {
 		vDragGrabbed = false;
 		vBarRelease();
+		e.preventDefault();
 	}
 	if (oDragGrabbed == true) {
 		oDragGrabbed = false;
 		oBarRelease();
+		e.preventDefault();
 	}
 })
 
@@ -302,12 +320,11 @@ function sidebarReleased() {
  * Drawing functions *
  *********************/
 
-var flag = false,
+var drawing = false,
 	prevX = 0,
 	currX = 0,
 	prevY = 0,
-	currY = 0,
-	dot_flag = false;
+	currY = 0;
 var trackimage = new Array();
 var step = 0;
 $('#btn_undo').css("pointer-events", "none");
@@ -335,36 +352,32 @@ function draw() {
 }
 
 function findxy(res, e) {
+	if (e.type !== undefined) //not touch event
+		e.preventDefault();
+	
 	if (res == 'down') {
 		currX = e.clientX - canvas0[0].offsetLeft;
 		currY = e.clientY - canvas0[0].offsetTop;
 		push();
-		flag = true;
-		dot_flag = true;
-		if (dot_flag) {
-			ctx.beginPath();
-			ctx.fillStyle = (mode == 'erase') ? 'white' : color;
-			ctx.arc(currX, currY, brushSize/2, 0, 2*Math.PI);
-			ctx.fill();
-			dot_flag = false;
-		}
-
+		drawing = true;
+		ctx.beginPath();
+		ctx.fillStyle = (mode == 'erase') ? 'white' : color;
+		ctx.arc(currX, currY, brushSize/2, 0, 2*Math.PI);
+		ctx.fill();
 		//TODO: start keeping track of line  
 	}
 	if (res == 'up' || res == "out") {
-		flag = false;
-		
+		drawing = false;
 		//TODO: finalize line, send to server
 	}
 	if (res == 'move') {
-		if (flag) {
+		if (drawing) {
 			prevX = currX;
 			prevY = currY;
 			currX = e.clientX - canvas0[0].offsetLeft;
 			currY = e.clientY - canvas0[0].offsetTop;
 			draw();
 		}
-
 		//TODO: add point to line  
 	}
 }
@@ -404,9 +417,7 @@ $('#btn_undo').click(function(e){
 	if (step == 0){
 		$('#btn_undo').css("pointer-events", "none");
 	}
-	
-	//TODO: adjust canvas layer visibility, notify server
-	
+	//TODO: adjust canvas layer visibility, notify server	
 });
 
 $('#btn_redo').click(function(e){
@@ -464,10 +475,24 @@ $('#btn_post').click(function(e){
 });
 
 $('#btn_tribes').click(function(e){
+	var i = tribes.indexOf(tribe);
+	var newTribe = tribes[++i % tribes.length];
 	
-	//TODO: toggle tribes, notify server after short interval (when user decides)
+	$('.btn').each(function(i) {changeTribe($(this), tribe, newTribe)});
+	$('.sidebar').each(function(i) {changeTribe($(this), tribe, newTribe)});
+	changeTribe($('#rotate_screen'), tribe, newTribe);
+	changeTribe($('#rotate_screen_msg'), tribe, newTribe);
+	changeTribe($('#small_screen'), tribe, newTribe);
+	changeTribe($('#small_screen_msg'), tribe, newTribe);
 	
+	tribe = newTribe;
 });
+
+function changeTribe (obj, oldTribe, newTribe) {
+	var oldAddr = obj.css('background-image');
+	var newAddr = oldAddr.replace('/img/' + oldTribe + '/', '/img/' + newTribe + '/');
+	obj.css('background-image', newAddr);
+}
 
 //TODO: sketch viewing functionality
 
