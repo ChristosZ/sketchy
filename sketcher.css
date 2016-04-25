@@ -172,7 +172,6 @@ div {
 	height: 100vh;
 	width: 12mm;
 	float: right;
-	background-color: gray;
 	overflow: hidden;
 	text-align: center;
 }
@@ -187,6 +186,7 @@ div {
 	width: 10mm;
 	height: 10mm;
 	margin: 0 auto;
+	background-image: url('img/common/tile_b_active.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center center;

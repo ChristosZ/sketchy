@@ -31,11 +31,16 @@ ctx.fillStyle = 'white'; //canvas is transparent by default
 ctx.fillRect(0, 0, canvas0.width(), canvas0.height());
 ctx.fill();
 
+//TODO: fixes & bugs:
 //First line takes a while to register?
 //draw off page quickly breaks the line
 //click and drag off bottom in IE scrolls a bit
 //keep drawing when off screen
 //IE: pull up options sidebar, then pull down, gets sticky
+//make tribe button hoverable
+//make sketch tiles clickable and scrollable with buttons
+//add vertical scrollbar in view mode and filtering
+//center image in view mode
 
 /****************************
  * General display behavior *
@@ -169,7 +174,7 @@ function unhelp (jObj) {
 
 function centerImage (jObj) {
 	var mTop = Math.max((cCont.height() - jObj.height())/2, cCont.height()*0.05);
-	var mLeft = Math.min(cCont.height() - jObj.height())/2, cCont.width()*0.05);
+	var mLeft = Math.min((cCont.height() - jObj.height())/2, cCont.width()*0.05);
 	jObj.css('margin-top', mTop);
 	jObj.css('margin-left', mLeft);
 }
@@ -179,9 +184,12 @@ function addTile (username, tribe, active) {
 	
 	var tile = $('<div class=tile></div>');
 	tile.attr('id', username);
-	var addr = tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted');
-	tile.css('background-image', 'url("img/common/tile_' + addr + '.png");');
 	tCont.append(tile);
+
+	var defaultAddr = tile.css('background-image');
+	var newAddr = defaultAddr.substring(0, defaultAddr.length - 14);
+	newAddr = newAddr + tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted') + '.png")';
+	tile.css('background-image', newAddr);
 }
 
 function removeTile(username) {
