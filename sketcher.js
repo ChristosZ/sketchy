@@ -36,13 +36,14 @@ ctx.fill();
 //click and drag off bottom in IE scrolls a bit
 //keep drawing when off screen
 //IE: pull up options sidebar, then pull down, gets sticky
-//make image preview vertically centered
 
 /****************************
  * General display behavior *
  ****************************/
 
 var cCont = $('#canvas_container');
+var tBar = $('#tile_controls');
+var tCont = $('#tile_container');
 var rotateMsg = $('#rotate_screen_msg');
 
 canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
@@ -51,7 +52,8 @@ rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
 $(window).resize(function() {
 	canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
 	rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
-
+	centerImage(canvasImg);
+	
 	clearTimeout(window.resizedFinished);
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1)
 		trackimage.push(canvas0[0].toDataURL());
@@ -165,6 +167,56 @@ function unhelp (jObj) {
 		hover(eraseBtn);
 }
 
+function centerImage (jObj) {
+	var mTop = Math.max((cCont.height() - jObj.height())/2, cCont.height()*0.05);
+	var mLeft = Math.min(cCont.height() - jObj.height())/2, cCont.width()*0.05);
+	jObj.css('margin-top', mTop);
+	jObj.css('margin-left', mLeft);
+}
+
+function addTile (username, tribe, active) {
+	if ($('#' + username).length !== 0) $('#' + username).remove();
+	
+	var tile = $('<div class=tile></div>');
+	tile.attr('id', username);
+	var addr = tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted');
+	tile.css('background-image', 'url("img/common/tile_' + addr + '.png");');
+	tCont.append(tile);
+}
+
+function removeTile(username) {
+	var tile = $('#' + username);
+	if (tile.length !== 0) tile.remove();
+}
+
+function changeTile (username, tribe, active) {
+	var tile = $('#' + username);
+	if (tile.length === 0) addTile(username, tribe, active);
+	else {
+		var oldAddr = tile.css('background-image');
+		var newAddr = oldAddr.substring(0, oldAddr.length - 14);
+		newAddr = newAddr + tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted') + '.png")';
+		tile.css('background-image', newAddr);
+	}
+}
+
+function fadeOutTileBarContents (t) {
+	$('#btn_up').fadeOut(t);
+	$('#btn_down').fadeOut(t);
+	tCont.fadeOut(t);
+}
+
+function fadeInTileBarContents (t) {
+	$('#btn_up').fadeIn(t);
+	$('#btn_down').fadeIn(t);
+	tCont.fadeIn(t);
+}
+
+addTile('user4', 'blue', false);
+addTile('user6', 'orange', true);
+changeTile('user6', 'gr', false);
+changeTile('user7', 'r', true);
+
 /***********************************************
  * 'touch' event handling for sidebar dragging *
  ***********************************************/
@@ -272,13 +324,22 @@ function vBarRelease() {
 	var threshold = (-1 * $('#sidebar_container').height()) / 2;
 	if (y_current < threshold) { //retract sidebar
 		vBar.css('top', 'calc(4mm - 100%)');
+		canvasImg.css('height', 'calc((100vw - 20mm) / 4 * 3 * 0.9)');
+		canvasImg.css('max-width', 'calc((100vw - 20mm) * 0.9)');
 		canvas.fadeIn(300);
 		canvas0.fadeIn(300);
 	}
 	else { //sidebar pulled down
 		vBar.css('top', '0px');
-		
-		//show viewing mode html in canvas container
+		var dataURL = canvas0[0].toDataURL(); //TODO: replace with live sketch
+		canvasImg.attr('src', dataURL);
+		canvasImg.css('height', 'calc((100vw - 32mm) / 4 * 3 * 0.9)');
+		canvasImg.css('max-width', 'calc((100vw - 32mm) * 0.9)');
+		centerImage(canvasImg);
+		cCont.css('width', 'calc(100% - 32mm)');
+		tBar.css('display', 'inline-block');
+		canvasImg.fadeIn(300);
+		fadeInTileBarContents(300);
 	}
 }
 
@@ -310,6 +371,7 @@ function oBarRelease() {
 		oBar.css('top', '0px');
 		var dataURL = canvas0[0].toDataURL();
 		canvasImg.attr('src', dataURL);
+		centerImage(canvasImg);
 		canvasImg.fadeIn(300);
 	}
 }
@@ -318,7 +380,12 @@ function oBarRelease() {
 function sidebarGrabbed() {
 	canvas.fadeOut(300);
 	canvas0.fadeOut(300);
+	fadeOutTileBarContents(300);
 	canvasImg.fadeOut(300);
+	setTimeout(function (){
+		cCont.css('width', 'calc(100% - 20mm)');	
+		tBar.css('display', 'none');
+	}, 300);
 	$('.help').each(function(i) { help($(this)); });
 }
 
@@ -472,11 +539,14 @@ $('#btn_mirror').click(function(e){
 	if (bar.css('float') == 'left') {
 		bar.css('float', 'right');
 		bar.css('background-image', addr.replace('_left.png','_right.png'));
+		tBar.css('float', 'left');
 	}
 	else {
 		bar.css('float', 'left');
 		bar.css('background-image', addr.replace('_right.png','_left.png'));		
+		tBar.css('float', 'right');
 	}
+	unhover($(this));
 });
 
 $('#btn_post').click(function(e){
