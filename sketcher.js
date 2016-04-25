@@ -302,11 +302,8 @@ function sidebarReleased() {
  * Drawing functions *
  *********************/
 
-var LBD = false; // only true if a line is being drawn, for keeping track of points array
-var points = [];
-
 var flag = false,
-	prevX = ,
+	prevX = 0,
 	currX = 0,
 	prevY = 0,
 	currY = 0,
@@ -337,38 +334,39 @@ function draw() {
 	ctx.stroke();
 }
 
-function getxy() {
+var points = [];
 
-	if(LBD == true) {
-		var w = canvas0[0].width;
-		var h = canvas0[0].height;
-		var x = currX;
-		var y = currY;
+var h = 0,
+	w = 0,
+	x = 0,
+	y = 0,
+	tuple = [];
 
-		x = (x/w) * 100;
+function sendPoint() {
+
+	if(flag == true) {
+		w = canvas0[0].width;
+		h = canvas0[0].height;
+		x = currX;
+		y = currY;
+		x = (x/w) * 100; 
 		y = (y/h) * 100;
-
-		var tuple = [x, y];
-		//console.log(tuple);
+		tuple = [x, y];
 
 		points.push(tuple);
-		//return tuple;
-	} else if (LBD == false) {
+
+	} else if (flag == false) {
 		console.table(points);
 
-		
 		//send points to server
 		//meta username and room name!
 		//clear the points
 		points = [];
 	}
 
-
 }
 
 function findxy(res, e) {
-
-	var points = [];
 
 	if (res == 'down') {
 		currX = e.clientX - canvas0[0].offsetLeft;
@@ -384,15 +382,12 @@ function findxy(res, e) {
 			dot_flag = false;
 		}
 
-		LBD = true;
-		getxy();
+		sendPoint();
 	}
 	if (res == 'up' || res == "out") {
 		flag = false;
-		
-		//send the array to server
-		LBD = false;
-		getxy();
+
+		sendPoint();
 	}
 	if (res == 'move') {
 		if (flag) {
@@ -402,8 +397,7 @@ function findxy(res, e) {
 			currY = e.clientY - canvas0[0].offsetTop;
 			draw();
 
-			//add points to array
-			getxy();
+			sendPoint();
 		}
 	}
 }
