@@ -302,8 +302,11 @@ function sidebarReleased() {
  * Drawing functions *
  *********************/
 
+var LBD = false; // only true if a line is being drawn, for keeping track of points array
+var points = [];
+
 var flag = false,
-	prevX = 0,
+	prevX = ,
 	currX = 0,
 	prevY = 0,
 	currY = 0,
@@ -334,7 +337,39 @@ function draw() {
 	ctx.stroke();
 }
 
+function getxy() {
+
+	if(LBD == true) {
+		var w = canvas0[0].width;
+		var h = canvas0[0].height;
+		var x = currX;
+		var y = currY;
+
+		x = (x/w) * 100;
+		y = (y/h) * 100;
+
+		var tuple = [x, y];
+		//console.log(tuple);
+
+		points.push(tuple);
+		//return tuple;
+	} else if (LBD == false) {
+		console.table(points);
+
+		
+		//send points to server
+		//meta username and room name!
+		//clear the points
+		points = [];
+	}
+
+
+}
+
 function findxy(res, e) {
+
+	var points = [];
+
 	if (res == 'down') {
 		currX = e.clientX - canvas0[0].offsetLeft;
 		currY = e.clientY - canvas0[0].offsetTop;
@@ -349,12 +384,15 @@ function findxy(res, e) {
 			dot_flag = false;
 		}
 
-		//TODO: start keeping track of line  
+		LBD = true;
+		getxy();
 	}
 	if (res == 'up' || res == "out") {
 		flag = false;
 		
-		//TODO: finalize line, send to server
+		//send the array to server
+		LBD = false;
+		getxy();
 	}
 	if (res == 'move') {
 		if (flag) {
@@ -363,9 +401,10 @@ function findxy(res, e) {
 			currX = e.clientX - canvas0[0].offsetLeft;
 			currY = e.clientY - canvas0[0].offsetTop;
 			draw();
-		}
 
-		//TODO: add point to line  
+			//add points to array
+			getxy();
+		}
 	}
 }
 
