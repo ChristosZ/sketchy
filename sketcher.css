@@ -170,6 +170,15 @@ div {
 	#small_screen {	display: none; }
 }
 
+#tile_container {
+	display: none;
+	height: 100vh;
+	width: 12mm;
+	display: inline-block;
+	float: right;
+	background-color: green;
+}
+
 /*#btn_colorwheel { background-image: url('img/blue/colorwheel.png'); }*/
 #btn_draw {	background-image: url('img/blue/draw.png'); }
 #btn_erase { background-image: url('img/blue/erase.png'); }

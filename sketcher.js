@@ -34,6 +34,9 @@ ctx.fill();
 //First line takes a while to register?
 //draw off page quickly breaks the line
 //click and drag off bottom in IE scrolls a bit
+//keep drawing when off screen
+//IE: pull up options sidebar, then pull down, gets sticky
+//make image preview vertically centered
 
 /****************************
  * General display behavior *
@@ -76,10 +79,7 @@ $('.hover').mouseleave(function(e){
 $('.hover').on('mousedown touchstart', function(e){
 	var obj = $(this);  
 	var addr = obj.css('background-image');
-	if (addr.indexOf('_c.png') == -1)
-		obj.css('background-image', addr.replace('.png','_c.png'));
-	else
-		obj.css('background-image', addr.replace('_c.png','.png'));
+	toggleHover(obj);
 })
 
 $('.hover').on('mouseup touchend', function(e){
@@ -102,22 +102,22 @@ $('#size_slider').on('pointerup mouseup touchend', function(e){
 });
 
 function hover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') == -1)
 		jObj.css('background-image', addr.replace('.png','_c.png'));
 }
 
 function unhover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') != -1)
 		jObj.css('background-image', addr.replace('_c.png','.png'));
 }
 
 function toggleHover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') != -1)
 		jObj.css('background-image', addr.replace('_c.png','.png'));
 	else
@@ -142,14 +142,37 @@ function setMode (jObj) {
 	}
 }
 
+function help (jObj) {
+	var addr = jObj.css('background-image');
+	if (addr.indexOf('_c.png') != -1) {
+		addr = addr.replace('_c.png','_h.png');
+	}
+	else {
+		if (addr.indexOf('_h.png') == -1) {
+		addr = addr.replace('.png','_h.png'); }
+	}
+	
+	jObj.css('background-image', addr);
+}
+
+function unhelp (jObj) {
+	var addr = jObj.css('background-image');
+	jObj.css('background-image', addr.replace('_h.png','.png'));
+	
+	if (mode == 'draw')
+		hover(drawBtn);
+	else if (mode == 'erase')
+		hover(eraseBtn);
+}
+
 /***********************************************
  * 'touch' event handling for sidebar dragging *
  ***********************************************/
 
 vDrag.on('touchstart', function(e){
 	var e = e.originalEvent;
-	vBarGrab(parseInt(e.changedTouches[0].clientY));
 	vDragGrabbed = true;
+	vBarGrab(parseInt(e.changedTouches[0].clientY));
 	e.preventDefault();
 })
 
@@ -168,8 +191,8 @@ vDrag.on('touchend', function(e){
 
 oDrag.on('touchstart', function(e){
 	var e = e.originalEvent;
-	oBarGrab(parseInt(e.changedTouches[0].clientY));
 	oDragGrabbed = true;
+	oBarGrab(parseInt(e.changedTouches[0].clientY));
 	e.preventDefault();
 })
 
@@ -181,8 +204,8 @@ oDrag.on('touchmove', function(e){
 
 oDrag.on('touchend', function(e){
 	var e = e.originalEvent;
-	oBarRelease();
 	oDragGrabbed = false;
+	oBarRelease();
 	e.preventDefault();
 })
 
@@ -191,13 +214,13 @@ oDrag.on('touchend', function(e){
  **********************************************************/
 
 vDrag.on('mousedown pointerdown', function(e){
-	vBarGrab(parseInt(e.clientY));
 	vDragGrabbed = true;
+	vBarGrab(parseInt(e.clientY));
 })
 
 oDrag.on('mousedown pointerdown', function(e){
-	oBarGrab(parseInt(e.clientY));
 	oDragGrabbed = true;
+	oBarGrab(parseInt(e.clientY));
 })
 
 $(document).on('mousemove pointermove', function(e){
@@ -296,24 +319,12 @@ function sidebarGrabbed() {
 	canvas.fadeOut(300);
 	canvas0.fadeOut(300);
 	canvasImg.fadeOut(300);
-	$('.help').each(function(i) {
-		var obj = $(this);
-		var addr = obj.css('background-image');
-
-		if (addr.indexOf('_c.png') !== -1)
-			obj.css('background-image', addr.replace('_c.png','_h.png'));
-		else
-			obj.css('background-image', addr.replace('.png','_h.png'));
-	});
+	$('.help').each(function(i) { help($(this)); });
 }
 
 //fade in canvas area and show button icons
 function sidebarReleased() {
-	$('.help').each(function(i) {
-		var obj = $(this);
-		var addr = obj.css('background-image');
-		obj.css('background-image', addr.replace('_h.png','.png'));
-	});
+	$('.help').each(function(i) { unhelp($(this)); });
 }
 
 /*********************
