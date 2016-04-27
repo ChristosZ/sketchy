@@ -16,6 +16,8 @@ var vybar_start, oybar_start, vytouchstart, oytouchstart;
 var vDragGrabbed = false;
 var oDragGrabbed = false;
 
+var tribes = ['blue', 'green', 'orange']
+var tribe = 'blue';
 var mode = 'draw';
 var color = '#FF0000';
 var brushSize = 6;
@@ -23,23 +25,52 @@ var eraserSize = 7;
 
 hover(drawBtn);
 $('#size_slider').val((brushSize*10)-1);
-
 canvas0[0].width = canvas0[0].offsetWidth;
 canvas0[0].height = canvas0[0].offsetHeight;
 ctx.fillStyle = 'white'; //canvas is transparent by default
 ctx.fillRect(0, 0, canvas0.width(), canvas0.height());
 ctx.fill();
 
-//canvas offset when window is resized
-//undo/redo initial one step
+//TODO: fixes & bugs:
+//First line takes a while to register?
+//draw off page quickly breaks the line
+//click and drag off bottom in IE scrolls a bit
+//keep drawing when off screen
+//IE: pull up options sidebar, then pull down, gets sticky
+//make tribe button hoverable
+//make sketch tiles clickable and scrollable with buttons
+//add vertical scrollbar in view mode and filtering
+//center image in view mode
 
+/****************************
+ * General display behavior *
+ ****************************/
+
+var cCont = $('#canvas_container');
+var tBar = $('#tile_controls');
+var tCont = $('#tile_container');
+var rotateMsg = $('#rotate_screen_msg');
+
+canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
+rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
 
 $(window).resize(function() {
+<<<<<<< HEAD
 	clearTimeout(window.resizedFinished);
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
 		trackimage.push(canvas0[0].toDataURL());
 	}
 	console.log(trackimage.length);
+=======
+	canvas.css('margin-top', Math.max((cCont.height() - cCont.width()*0.75)/2, 0));
+	rotateMsg.css('margin-top', (cCont.height()-rotateMsg.height())/2);
+	centerImage(canvasImg);
+	
+	clearTimeout(window.resizedFinished);
+	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1)
+		trackimage.push(canvas0[0].toDataURL());
+	
+>>>>>>> origin/master
     window.resizedFinished = setTimeout(function(){
     	canvas0[0].width = canvas0[0].offsetWidth;
 	    canvas0[0].height = canvas0[0].offsetHeight;
@@ -48,15 +79,14 @@ $(window).resize(function() {
 		ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
 		newtrack.onload = function() {ctx.drawImage(newtrack,0,0,canvas0[0].width,canvas0[0].height);}
     }, 250);
+<<<<<<< HEAD
 	// var newtrack = new Image();
 	// newtrack.src = trackimage[trackimage.length-1];
 	// ctx.clearRect(0, 0, canvas0[0].width, canvas0[0].height);
 	// newtrack.onload = function() {ctx.drawImage(newtrack,0,0,canvas0[0].width,canvas0[0].height);}
+=======
+>>>>>>> origin/master
 });
-
-/***********************************************
- * General button hover/press display behavior *
- ***********************************************/
 
 $('.hover').mouseenter(function(e){
 	hover($(this));
@@ -71,10 +101,7 @@ $('.hover').mouseleave(function(e){
 $('.hover').on('mousedown touchstart', function(e){
 	var obj = $(this);  
 	var addr = obj.css('background-image');
-	if (addr.indexOf('_c.png') == -1)
-		obj.css('background-image', addr.replace('.png','_c.png'));
-	else
-		obj.css('background-image', addr.replace('_c.png','.png'));
+	toggleHover(obj);
 })
 
 $('.hover').on('mouseup touchend', function(e){
@@ -97,22 +124,22 @@ $('#size_slider').on('pointerup mouseup touchend', function(e){
 });
 
 function hover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') == -1)
 		jObj.css('background-image', addr.replace('.png','_c.png'));
 }
 
 function unhover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') != -1)
 		jObj.css('background-image', addr.replace('_c.png','.png'));
 }
 
 function toggleHover (jObj) {
-	if (vDragGrabbed | oDragGrabbed) return;
 	var addr = jObj.css('background-image');
+	if (addr.indexOf('_h.png') != -1) return;
 	if (addr.indexOf('_c.png') != -1)
 		jObj.css('background-image', addr.replace('_c.png','.png'));
 	else
@@ -137,14 +164,90 @@ function setMode (jObj) {
 	}
 }
 
+function help (jObj) {
+	var addr = jObj.css('background-image');
+	if (addr.indexOf('_c.png') != -1) {
+		addr = addr.replace('_c.png','_h.png');
+	}
+	else {
+		if (addr.indexOf('_h.png') == -1) {
+		addr = addr.replace('.png','_h.png'); }
+	}
+	
+	jObj.css('background-image', addr);
+}
+
+function unhelp (jObj) {
+	var addr = jObj.css('background-image');
+	jObj.css('background-image', addr.replace('_h.png','.png'));
+	
+	if (mode == 'draw')
+		hover(drawBtn);
+	else if (mode == 'erase')
+		hover(eraseBtn);
+}
+
+function centerImage (jObj) {
+	var mTop = Math.max((cCont.height() - jObj.height())/2, cCont.height()*0.05);
+	var mLeft = Math.min((cCont.height() - jObj.height())/2, cCont.width()*0.05);
+	jObj.css('margin-top', mTop);
+	jObj.css('margin-left', mLeft);
+}
+
+function addTile (username, tribe, active) {
+	if ($('#' + username).length !== 0) $('#' + username).remove();
+	
+	var tile = $('<div class=tile></div>');
+	tile.attr('id', username);
+	tCont.append(tile);
+
+	var defaultAddr = tile.css('background-image');
+	var newAddr = defaultAddr.substring(0, defaultAddr.length - 14);
+	newAddr = newAddr + tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted') + '.png")';
+	tile.css('background-image', newAddr);
+}
+
+function removeTile(username) {
+	var tile = $('#' + username);
+	if (tile.length !== 0) tile.remove();
+}
+
+function changeTile (username, tribe, active) {
+	var tile = $('#' + username);
+	if (tile.length === 0) addTile(username, tribe, active);
+	else {
+		var oldAddr = tile.css('background-image');
+		var newAddr = oldAddr.substring(0, oldAddr.length - 14);
+		newAddr = newAddr + tribe.substring(0,1) + '_' + ((active) ? 'active' : 'posted') + '.png")';
+		tile.css('background-image', newAddr);
+	}
+}
+
+function fadeOutTileBarContents (t) {
+	$('#btn_up').fadeOut(t);
+	$('#btn_down').fadeOut(t);
+	tCont.fadeOut(t);
+}
+
+function fadeInTileBarContents (t) {
+	$('#btn_up').fadeIn(t);
+	$('#btn_down').fadeIn(t);
+	tCont.fadeIn(t);
+}
+
+addTile('user4', 'blue', false);
+addTile('user6', 'orange', true);
+changeTile('user6', 'gr', false);
+changeTile('user7', 'r', true);
+
 /***********************************************
  * 'touch' event handling for sidebar dragging *
  ***********************************************/
 
 vDrag.on('touchstart', function(e){
 	var e = e.originalEvent;
-	vBarGrab(parseInt(e.changedTouches[0].clientY));
 	vDragGrabbed = true;
+	vBarGrab(parseInt(e.changedTouches[0].clientY));
 	e.preventDefault();
 })
 
@@ -163,8 +266,8 @@ vDrag.on('touchend', function(e){
 
 oDrag.on('touchstart', function(e){
 	var e = e.originalEvent;
-	oBarGrab(parseInt(e.changedTouches[0].clientY));
 	oDragGrabbed = true;
+	oBarGrab(parseInt(e.changedTouches[0].clientY));
 	e.preventDefault();
 })
 
@@ -176,8 +279,8 @@ oDrag.on('touchmove', function(e){
 
 oDrag.on('touchend', function(e){
 	var e = e.originalEvent;
-	oBarRelease();
 	oDragGrabbed = false;
+	oBarRelease();
 	e.preventDefault();
 })
 
@@ -186,28 +289,36 @@ oDrag.on('touchend', function(e){
  **********************************************************/
 
 vDrag.on('mousedown pointerdown', function(e){
-	vBarGrab(parseInt(e.clientY));
 	vDragGrabbed = true;
+	vBarGrab(parseInt(e.clientY));
 })
 
 oDrag.on('mousedown pointerdown', function(e){
-	oBarGrab(parseInt(e.clientY));
 	oDragGrabbed = true;
+	oBarGrab(parseInt(e.clientY));
 })
 
 $(document).on('mousemove pointermove', function(e){
-	if (vDragGrabbed) vBarMove(parseInt(e.clientY));
-	if (oDragGrabbed) oBarMove(parseInt(e.clientY));
+	if (vDragGrabbed) {
+		vBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}
+	if (oDragGrabbed) {
+		oBarMove(parseInt(e.clientY));
+		e.preventDefault();
+	}
 })
 
 $(document).on('mouseup pointerup', function(e){
 	if (vDragGrabbed == true) {
 		vDragGrabbed = false;
 		vBarRelease();
+		e.preventDefault();
 	}
 	if (oDragGrabbed == true) {
 		oDragGrabbed = false;
 		oBarRelease();
+		e.preventDefault();
 	}
 })
 
@@ -236,13 +347,22 @@ function vBarRelease() {
 	var threshold = (-1 * $('#sidebar_container').height()) / 2;
 	if (y_current < threshold) { //retract sidebar
 		vBar.css('top', 'calc(4mm - 100%)');
+		canvasImg.css('height', 'calc((100vw - 20mm) / 4 * 3 * 0.9)');
+		canvasImg.css('max-width', 'calc((100vw - 20mm) * 0.9)');
 		canvas.fadeIn(300);
 		canvas0.fadeIn(300);
 	}
 	else { //sidebar pulled down
 		vBar.css('top', '0px');
-		
-		//show viewing mode html in canvas container
+		var dataURL = canvas0[0].toDataURL(); //TODO: replace with live sketch
+		canvasImg.attr('src', dataURL);
+		canvasImg.css('height', 'calc((100vw - 32mm) / 4 * 3 * 0.9)');
+		canvasImg.css('max-width', 'calc((100vw - 32mm) * 0.9)');
+		centerImage(canvasImg);
+		cCont.css('width', 'calc(100% - 32mm)');
+		tBar.css('display', 'inline-block');
+		canvasImg.fadeIn(300);
+		fadeInTileBarContents(300);
 	}
 }
 
@@ -274,6 +394,7 @@ function oBarRelease() {
 		oBar.css('top', '0px');
 		var dataURL = canvas0[0].toDataURL();
 		canvasImg.attr('src', dataURL);
+		centerImage(canvasImg);
 		canvasImg.fadeIn(300);
 	}
 }
@@ -282,37 +403,29 @@ function oBarRelease() {
 function sidebarGrabbed() {
 	canvas.fadeOut(300);
 	canvas0.fadeOut(300);
+	fadeOutTileBarContents(300);
 	canvasImg.fadeOut(300);
-	$('.help').each(function(i) {
-		var obj = $(this);
-		var addr = obj.css('background-image');
-
-		if (addr.indexOf('_c.png') !== -1)
-			obj.css('background-image', addr.replace('_c.png','_h.png'));
-		else
-			obj.css('background-image', addr.replace('.png','_h.png'));
-	});
+	setTimeout(function (){
+		cCont.css('width', 'calc(100% - 20mm)');	
+		tBar.css('display', 'none');
+	}, 300);
+	$('.help').each(function(i) { help($(this)); });
 }
 
 //fade in canvas area and show button icons
 function sidebarReleased() {
-	$('.help').each(function(i) {
-		var obj = $(this);
-		var addr = obj.css('background-image');
-		obj.css('background-image', addr.replace('_h.png','.png'));
-	});
+	$('.help').each(function(i) { unhelp($(this)); });
 }
 
 /*********************
  * Drawing functions *
  *********************/
 
-var flag = false,
+var drawing = false,
 	prevX = 0,
 	currX = 0,
 	prevY = 0,
-	currY = 0,
-	dot_flag = false;
+	currY = 0;
 var trackimage = new Array();
 var step = 0;
 $('#btn_undo').css("pointer-events", "none");
@@ -340,10 +453,14 @@ function draw() {
 }
 
 function findxy(res, e) {
+	if (e.type !== undefined) //not touch event
+		e.preventDefault();
+	
 	if (res == 'down') {
 		currX = e.clientX - canvas0[0].offsetLeft;
 		currY = e.clientY - canvas0[0].offsetTop;
 		push();
+<<<<<<< HEAD
 		flag = true;
 		dot_flag = true;
 		if (dot_flag) {
@@ -354,22 +471,27 @@ function findxy(res, e) {
 			dot_flag = false;
 		}
 
+=======
+		drawing = true;
+		ctx.beginPath();
+		ctx.fillStyle = (mode == 'erase') ? 'white' : color;
+		ctx.arc(currX, currY, brushSize/2, 0, 2*Math.PI);
+		ctx.fill();
+>>>>>>> origin/master
 		//TODO: start keeping track of line  
 	}
 	if (res == 'up' || res == "out") {
-		flag = false;
-		
+		drawing = false;
 		//TODO: finalize line, send to server
 	}
 	if (res == 'move') {
-		if (flag) {
+		if (drawing) {
 			prevX = currX;
 			prevY = currY;
 			currX = e.clientX - canvas0[0].offsetLeft;
 			currY = e.clientY - canvas0[0].offsetTop;
 			draw();
 		}
-
 		//TODO: add point to line  
 	}
 }
@@ -377,14 +499,12 @@ function findxy(res, e) {
 function push(){
 	step++;
 	$('#btn_undo').css("pointer-events", "auto");
-	console.log(step);
 	if (step < trackimage.length){
 		trackimage = trackimage.slice(0, step);
 	}
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
 		trackimage.push(canvas0[0].toDataURL());
 	}
-	//console.log(trackimage);
 }
 
 /******************************
@@ -397,7 +517,6 @@ $('.colorbtn').click(function(e){
 });
 
 $('#btn_undo').click(function(e){
-	console.log('undo');
 	if (trackimage.indexOf(canvas0[0].toDataURL()) == -1){
 		trackimage.push(canvas0[0].toDataURL());
 	}
@@ -410,16 +529,12 @@ $('#btn_undo').click(function(e){
 		oldtrack.onload = function (){ctx.drawImage(oldtrack,0,0);}
 	}
 	if (step == 0){
-		console.log('step = 0');
 		$('#btn_undo').css("pointer-events", "none");
 	}
-	
-	//TODO: adjust canvas layer visibility, notify server
-	
+	//TODO: adjust canvas layer visibility, notify server	
 });
 
 $('#btn_redo').click(function(e){
-	console.log('redo');
 	if (step < trackimage.length-1){
 			step++;
 			var newtrack = new Image();
@@ -430,7 +545,6 @@ $('#btn_redo').click(function(e){
 	if (step == trackimage.length-1){
 		$('#btn_redo').css("pointer-events", "none");
 		$('#btn_undo').css("pointer-events", "auto");
-		console.log('here');
 	}
 	
 	//TODO: adjust canvas layer visibility, notify server
@@ -461,11 +575,14 @@ $('#btn_mirror').click(function(e){
 	if (bar.css('float') == 'left') {
 		bar.css('float', 'right');
 		bar.css('background-image', addr.replace('_left.png','_right.png'));
+		tBar.css('float', 'left');
 	}
 	else {
 		bar.css('float', 'left');
 		bar.css('background-image', addr.replace('_right.png','_left.png'));		
+		tBar.css('float', 'right');
 	}
+	unhover($(this));
 });
 
 $('#btn_post').click(function(e){
@@ -475,10 +592,24 @@ $('#btn_post').click(function(e){
 });
 
 $('#btn_tribes').click(function(e){
+	var i = tribes.indexOf(tribe);
+	var newTribe = tribes[++i % tribes.length];
 	
-	//TODO: toggle tribes, notify server after short interval (when user decides)
+	$('.btn').each(function(i) {changeTribe($(this), tribe, newTribe)});
+	$('.sidebar').each(function(i) {changeTribe($(this), tribe, newTribe)});
+	changeTribe($('#rotate_screen'), tribe, newTribe);
+	changeTribe($('#rotate_screen_msg'), tribe, newTribe);
+	changeTribe($('#small_screen'), tribe, newTribe);
+	changeTribe($('#small_screen_msg'), tribe, newTribe);
 	
+	tribe = newTribe;
 });
+
+function changeTribe (obj, oldTribe, newTribe) {
+	var oldAddr = obj.css('background-image');
+	var newAddr = oldAddr.replace('/img/' + oldTribe + '/', '/img/' + newTribe + '/');
+	obj.css('background-image', newAddr);
+}
 
 //TODO: sketch viewing functionality
 
