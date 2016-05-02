@@ -8,14 +8,13 @@
 		<script type="text/javascript" src="sketcher.js"></script>
 	</head>
 	<body>
-		<div id='rotate_screen'>Rotate screen!</div>
-		<div id='small_screen'>Screen too small!</div>
+		<div id='rotate_screen'><div id='rotate_screen_msg'></div></div>
+		<div id='small_screen'><div id='small_screen_msg'></div></div>
 		<div id='sidebar_container'>
 			<div id='sidebar_view' class=sidebar>
 				<div id='view_btn_container' class=btn_container>
-					<div id='slider_scroll' class=btn><br><br>sc
-					</div><div id='btn_active' class='btn help hover'><br><br>
-					</div><br><div id='btn_posted' class='btn help hover'><br><br>
+					<div id='btn_active' class='btn help hover'><br><br>
+					</div><div id='btn_posted' class='btn help hover'><br><br>
 					</div><br><div id='btn_tribe' class='btn help'><br><br></div>
 				</div>
 				<div id='view_drag' class='btn help hover'></div>
@@ -53,8 +52,13 @@
 <!--Undo layers:<canvas id='canvas_layer1'></canvas>
 				<canvas id='canvas_layer2'></canvas>
 				<canvas id='canvas_layer3'></canvas> -->
-			</div>	
-			<img id="canvas_img"></img>
+			</div>
+			<img id="canvas_img"/>
+		</div>
+		<div id='tile_controls'>
+			<div id='btn_up' class='btn hover'></div>
+			<div id='tile_container'></div>
+			<div id='btn_down' class='btn hover'></div>
 		</div>
 	</body>
 </html>

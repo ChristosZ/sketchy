@@ -3,7 +3,7 @@ body {
 	padding: 0;
 	margin: 0;
 	height: 100vh;
-	width: 100%;
+	width: 100vw;
 	overflow: hidden;
 	touch-action: none;
 }
@@ -19,7 +19,16 @@ div {
 	height: 100vh;
 	width: 100%;
 	z-index: 20;
-	background-color: red;
+}
+
+#rotate_screen_msg {
+	height: calc(100% - 10mm);
+	width: calc(100% - 10mm);
+	max-width: 50mm;
+	margin: 5mm auto;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
 }
 
 #small_screen {
@@ -28,19 +37,29 @@ div {
 	height: 100vh;
 	width: 100%;
 	z-index: 20;
-	background-color: darkred;
 }
-	
+
+#small_screen_msg {
+	height: calc(100% - 6mm);
+	width: calc(100% - 6mm);
+	max-width: 50mm;
+	margin: 3mm auto;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
 #sidebar_container {
 	display: inline-block;
 	width: 20mm;
-	height: 100vh;
+	height: 100%;
 	float: left;
+	overflow: hidden;
 }
 
 .sidebar {
-	position: absolute;
-	height: 100%;
+	position: relative;
+	height: 100vh;
 	width: 20mm;
 }
 
@@ -67,7 +86,9 @@ div {
 	height:6mm;
 }
 
-#sidebar_draw {}
+#sidebar_draw {
+	margin-top: -100vh;
+}
 
 #sidebar_view {
 	z-index: 5;
@@ -82,6 +103,7 @@ div {
 }
 
 #sidebar_options {
+	margin-top: -100vh;
 	z-index: 5;
 	top: calc(100% - 4mm);
 }
@@ -104,7 +126,6 @@ div {
 	display: inline-block;
 	width: calc(100% - 20mm);
 	height: 100vh;
-	float: right;
 	background-color: grey;
 }
 
@@ -130,9 +151,7 @@ div {
 	height: calc((100vw - 20mm) / 4 * 3 * 0.9);
 	max-height: 90%;
 	width: calc(400vh / 3 * 0.9);
-	max-width: calc((100% - 20mm) * 0.9);
-	margin-top: 5vh;
-	margin-left: calc((100% - 20mm) * 0.05);
+	max-width: calc((100vw - 20mm) * 0.9);
 	z-index: 5;
 }
 
@@ -148,6 +167,35 @@ div {
 	#small_screen {	display: none; }
 }
 
+#tile_controls {
+	display: none;
+	height: 100vh;
+	width: 12mm;
+	float: right;
+	overflow: hidden;
+	text-align: center;
+}
+
+#btn_up, #btn_down {
+	width: 10mm;
+	margin: 1mm auto;
+}
+
+.tile {
+	display: block;
+	width: 10mm;
+	height: 10mm;
+	margin: 0 auto;
+	background-image: url('img/common/tile_b_active.png');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+#tile_container {
+	height: calc(100vh - 25mm);
+}
+
 /*#btn_colorwheel { background-image: url('img/blue/colorwheel.png'); }*/
 #btn_draw {	background-image: url('img/blue/draw.png'); }
 #btn_erase { background-image: url('img/blue/erase.png'); }
@@ -157,10 +205,16 @@ div {
 #options_drag { background-image: url('img/blue/options.png'); }
 #btn_active { background-image: url('img/blue/draw.png'); }
 #btn_posted { background-image: url('img/blue/post.png'); }
-#btn_tribe { background-image: url('img/common/tribe.png'); }
+#btn_tribe { background-image: url('img/blue/tribe.png'); }
 #btn_save { background-image: url('img/blue/save.png'); }
 #btn_post { background-image: url('img/blue/post.png'); }
 #btn_mirror { background-image: url('img/blue/mirror.png'); }
 #btn_clear { background-image: url('img/blue/clear.png'); }
-#btn_tribes { background-image: url('img/common/tribe.png'); }
+#btn_tribes { background-image: url('img/blue/tribe.png'); }
+#rotate_screen { background-image: url('img/blue/bar_top.png'); }
+#rotate_screen_msg { background-image: url('img/blue/rotate_screen.png'); }
+#small_screen { background-image: url('img/blue/bar_top.png'); }
+#small_screen_msg { background-image: url('img/blue/small_screen.png'); }
+#btn_up { background-image: url('img/blue/post.png'); }
+#btn_down { background-image: url('img/blue/save.png'); }
 .sidebar { background-image: url('img/blue/bar_left.png'); }
