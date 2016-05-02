@@ -334,13 +334,12 @@ function draw() {
 	ctx.stroke();
 }
 
-var points = [];
-
 var h = 0,
 	w = 0,
 	x = 0,
 	y = 0,
-	tuple = [];
+	tuple = [],
+	points = [];
 
 function sendPoint() {
 
@@ -374,6 +373,7 @@ function findxy(res, e) {
 		push();
 		flag = true;
 		dot_flag = true;
+		
 		if (dot_flag) {
 			ctx.beginPath();
 			ctx.fillStyle = (mode == 'erase') ? 'white' : color;
